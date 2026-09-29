@@ -147,7 +147,7 @@ class _DoctorSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        DoctorPhoto(url: doctor.imageUrl, size: 104),
+        DoctorPhoto(path: doctor.imagePath, size: 104),
         const SizedBox(width: 16),
         Expanded(
           child: Column(

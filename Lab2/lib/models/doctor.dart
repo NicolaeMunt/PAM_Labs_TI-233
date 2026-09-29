@@ -1,7 +1,7 @@
 class Doctor {
   final String name;
   final String specialty;
-  final String imageUrl;
+  final String imagePath;
   final String address;
   final String distance;
   final double price;
@@ -9,7 +9,7 @@ class Doctor {
   const Doctor({
     required this.name,
     required this.specialty,
-    required this.imageUrl,
+    required this.imagePath,
     this.address = '',
     this.distance = '',
     this.price = 0,
@@ -18,22 +18,22 @@ class Doctor {
 
 class HealthService {
   final String label;
-  final String emoji;
+  final String iconPath;
 
-  const HealthService(this.label, this.emoji);
+  const HealthService(this.label, this.iconPath);
 }
 
 const upcomingDoctor = Doctor(
   name: 'Dr. Richar Kandowen',
   specialty: 'Child Specialist',
-  imageUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
+  imagePath: 'assets/images/dr_richar_kandowen.jpg',
   price: 120,
 );
 
 const appointmentDoctor = Doctor(
   name: 'Dr.Upul',
   specialty: 'Denteeth',
-  imageUrl: 'https://randomuser.me/api/portraits/men/75.jpg',
+  imagePath: 'assets/images/dr_upul.jpg',
   price: 120,
 );
 
@@ -41,7 +41,7 @@ const nearbyDoctors = [
   Doctor(
     name: 'Dr. Emmly Lestriyno',
     specialty: 'General Practitioner',
-    imageUrl: 'https://randomuser.me/api/portraits/women/44.jpg',
+    imagePath: 'assets/images/dr_emmly_lestriyno.jpg',
     address: '3167 Durgan Shores',
     distance: '500M',
     price: 90,
@@ -49,7 +49,7 @@ const nearbyDoctors = [
   Doctor(
     name: 'Dr. Sonja Liffel',
     specialty: 'Dental Specialist',
-    imageUrl: 'https://randomuser.me/api/portraits/men/46.jpg',
+    imagePath: 'assets/images/dr_sonja_liffel.jpg',
     address: '950 Sigrid Port',
     distance: '755M',
     price: 120,
@@ -57,8 +57,8 @@ const nearbyDoctors = [
 ];
 
 const healthServices = [
-  HealthService('Tooth', '🦷'),
-  HealthService('Eye', '👁️'),
-  HealthService('Lungs', '🫁'),
-  HealthService('Ear', '👂'),
+  HealthService('Tooth', 'assets/images/tooth.png'),
+  HealthService('Eye', 'assets/images/eye.png'),
+  HealthService('Lungs', 'assets/images/lungs.png'),
+  HealthService('Ear', 'assets/images/ear.png'),
 ];

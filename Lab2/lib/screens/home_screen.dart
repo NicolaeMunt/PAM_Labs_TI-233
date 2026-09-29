@@ -66,7 +66,7 @@ class _Header extends StatelessWidget {
     return Row(
       children: [
         const DoctorPhoto(
-          url: 'https://randomuser.me/api/portraits/men/11.jpg',
+          path: 'assets/images/user_jonathan.jpg',
           size: 44,
           radius: 22,
         ),
@@ -250,7 +250,7 @@ class _AppointmentCard extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  DoctorPhoto(url: upcomingDoctor.imageUrl, size: 36),
+                  DoctorPhoto(path: upcomingDoctor.imagePath, size: 36),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(
@@ -342,10 +342,7 @@ class _HealthServicesRow extends StatelessWidget {
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text(
-                  service.emoji,
-                  style: const TextStyle(fontSize: 28),
-                ),
+                child: Image.asset(service.iconPath, width: 32, height: 32),
               ),
               const SizedBox(height: 8),
               Text(
@@ -382,7 +379,7 @@ class _NearbyDoctorTile extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            DoctorPhoto(url: doctor.imageUrl, size: 44, radius: 22),
+            DoctorPhoto(path: doctor.imagePath, size: 44, radius: 22),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
