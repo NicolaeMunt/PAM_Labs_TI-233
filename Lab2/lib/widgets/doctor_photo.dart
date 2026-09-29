@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
-
-/// Rounded doctor portrait loaded from the network, with an icon fallback
-/// so the UI still renders when offline.
+/// Rounded portrait loaded from the app's bundled assets.
 class DoctorPhoto extends StatelessWidget {
-  final String url;
+  final String path;
   final double size;
   final double radius;
 
   const DoctorPhoto({
     super.key,
-    required this.url,
+    required this.path,
     required this.size,
     this.radius = 8,
   });
@@ -20,21 +17,13 @@ class DoctorPhoto extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
-      child: Image.network(
-        url,
+      child: Image.asset(
+        path,
         width: size,
         height: size,
         fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => Container(
-          width: size,
-          height: size,
-          color: AppColors.surface,
-          child: Icon(
-            Icons.person,
-            size: size * 0.6,
-            color: AppColors.textGrey,
-          ),
-        ),
+        // Keep faces in frame when a tall photo is cropped to a square.
+        alignment: Alignment.topCenter,
       ),
     );
   }
