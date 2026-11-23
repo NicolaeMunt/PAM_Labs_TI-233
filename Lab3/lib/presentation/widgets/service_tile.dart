@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:http/http.dart' as http;
 
 import '../../core/theme/app_colors.dart';
-import '../../data/models/home_models.dart';
+import '../../domain/entities/home_feed.dart';
 
 /// Square "Health Services" button. Selected tiles filter the doctor list.
 class ServiceTile extends StatelessWidget {
@@ -10,18 +11,22 @@ class ServiceTile extends StatelessWidget {
   final bool selected;
   final VoidCallback? onTap;
 
+  /// Client used to download the SVG icon. Null uses a default one.
+  final http.Client? httpClient;
+
   const ServiceTile({
     super.key,
     required this.service,
     this.selected = false,
     this.onTap,
+    this.httpClient,
   });
 
   @override
   Widget build(BuildContext context) {
     // Bundled PNG from Lab 2, used while the SVG loads or if it fails.
     final fallback = Image.asset(
-      service.fallbackAsset,
+      'assets/images/${service.id}.png',
       width: 32,
       height: 32,
       errorBuilder: (_, _, _) =>
@@ -55,6 +60,7 @@ class ServiceTile extends StatelessWidget {
                   ? fallback
                   : SvgPicture.network(
                       service.iconUrl,
+                      httpClient: httpClient,
                       width: 32,
                       height: 32,
                       placeholderBuilder: (_) => fallback,

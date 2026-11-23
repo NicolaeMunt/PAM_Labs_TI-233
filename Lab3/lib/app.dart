@@ -2,23 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/theme/app_theme.dart';
-import 'data/repositories/health_repository.dart';
-import 'logic/home/home_cubit.dart';
+import 'injection.dart';
+import 'presentation/cubits/home/home_cubit.dart';
 import 'presentation/screens/home_screen.dart';
 
 class HealthApp extends StatelessWidget {
-  final HealthRepository repository;
+  final AppDependencies dependencies;
 
-  const HealthApp({super.key, required this.repository});
+  const HealthApp({super.key, required this.dependencies});
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider.value(
-      value: repository,
-      // Provided above MaterialApp so every screen (home, details, the
-      // filter sheet) shares the same favorites and filters.
+    return MultiRepositoryProvider(
+      // Use cases are available to every screen via context.read<...>().
+      providers: [
+        RepositoryProvider.value(value: dependencies.getHomeFeed),
+        RepositoryProvider.value(value: dependencies.getAppointmentDetails),
+        RepositoryProvider.value(value: dependencies.httpClient),
+      ],
+      // Above MaterialApp so home, details and the filter sheet share
+      // the same favorites and filters.
       child: BlocProvider(
-        create: (_) => HomeCubit(repository)..load(),
+        create: (_) => HomeCubit(getHomeFeed: dependencies.getHomeFeed)..load(),
         child: MaterialApp(
           title: 'Health Appointments',
           debugShowCheckedModeBanner: false,

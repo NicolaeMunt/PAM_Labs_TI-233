@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'app.dart';
-import 'data/repositories/health_repository.dart';
+import 'injection.dart';
 
 void main() {
-  runApp(HealthApp(repository: AssetHealthRepository()));
+  runApp(HealthApp(dependencies: AppDependencies.live()));
 }

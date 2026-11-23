@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart' as http;
 
 import '../../core/theme/app_colors.dart';
-import '../../data/models/doctor.dart';
-import '../../logic/home/home_cubit.dart';
+import '../../domain/entities/doctor.dart';
+import '../../domain/usecases/filter_doctors.dart';
+import '../cubits/home/home_cubit.dart';
 import '../widgets/appointment_card.dart';
 import '../widgets/doctor_card.dart';
 import '../widgets/home_header.dart';
@@ -25,9 +27,9 @@ class HomeScreen extends StatelessWidget {
           // Only rebuild the whole page when we switch between
           // "no data yet" and "have data".
           buildWhen: (prev, next) =>
-              prev.status != next.status || prev.data != next.data,
+              prev.status != next.status || prev.feed != next.feed,
           builder: (context, state) {
-            if (state.data == null) {
+            if (state.feed == null) {
               return switch (state.status) {
                 HomeStatus.error => ErrorView(
                   message: state.errorMessage ?? 'Unknown error.',
@@ -48,8 +50,8 @@ class HomeScreen extends StatelessWidget {
 class _HomeContent extends StatelessWidget {
   const _HomeContent();
 
-  void _openDoctor(BuildContext context, Doctor doctor) {
-    Navigator.of(context).push(DoctorDetailsScreen.route(doctor));
+  void _openDoctor(BuildContext context, [Doctor? doctor]) {
+    Navigator.of(context).push(DoctorDetailsScreen.route(doctor: doctor));
   }
 
   Future<void> _refresh(BuildContext context) async {
@@ -65,7 +67,7 @@ class _HomeContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final cubit = context.read<HomeCubit>();
     final state = context.watch<HomeCubit>().state;
-    final data = state.data!;
+    final data = state.feed!;
     const hPad = EdgeInsets.symmetric(horizontal: 20);
 
     return RefreshIndicator(
@@ -101,12 +103,8 @@ class _HomeContent extends StatelessWidget {
                 const SizedBox(height: 20),
                 AppointmentCard(
                   appointment: data.appointment,
-                  onTap: () {
-                    final doctor = data.doctorNamed(
-                      data.appointment.doctorName,
-                    );
-                    if (doctor != null) _openDoctor(context, doctor);
-                  },
+                  // Opens the appointment described by GET /feed/details.
+                  onTap: () => _openDoctor(context),
                 ),
                 const SizedBox(height: 24),
                 SectionHeader(
@@ -123,6 +121,7 @@ class _HomeContent extends StatelessWidget {
                         service: service,
                         selected: state.serviceId == service.id,
                         onTap: () => cubit.selectService(service.id),
+                        httpClient: context.read<http.Client>(),
                       ),
                   ],
                 ),
@@ -178,7 +177,7 @@ class _QuickFilters extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<HomeCubit>();
-    final service = state.data?.serviceById(state.serviceId);
+    final service = state.feed?.serviceById(state.serviceId);
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,

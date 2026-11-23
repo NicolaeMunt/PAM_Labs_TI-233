@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
-import '../../data/models/appointment_details.dart';
+import '../../domain/entities/appointment_details.dart';
 
 /// Horizontally scrolling row of selectable pills (hours or dates).
 class SlotSelector extends StatelessWidget {

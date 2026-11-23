@@ -1,58 +1,87 @@
-# Lab 3 – State Management & async data (Flutter + Cubit)
+# Lab 4 – REST API, JSON Serialization & Clean Architecture
 
-Health appointment app from Lab 2, rebuilt so that all content comes from a
-JSON file loaded asynchronously and all screen state is managed with
-**flutter_bloc (Cubit)**.
+The health appointment app from Labs 2–3, same design, now loading all its
+data from a REST API (variant **v2**) over HTTP.
 
-## Features
+| Endpoint | Used for |
+|---|---|
+| `GET https://test-api-jlbn.onrender.com/lab2026/v2/feed` | Home screen: user, appointment card, health services, nearby doctors |
+| `GET https://test-api-jlbn.onrender.com/lab2026/v2/feed/details` | Details screen: payment, description, working hours, dates, booking button |
 
-- **Async loading** of `assets/data/health_data.json` (`rootBundle.loadString`
-  + JSON decoding on a background isolate with `compute`).
-- **States:** Loading (spinner), Success (list), Empty (no doctors / no match,
-  with "Clear filters"), Error (message + "Try again").
-- **Search** by name, specialty or address.
-- **Filter** by health service (tap Tooth / Eye / Lungs / Ear) and
-  "Favorites only".
-- **Sort:** nearest, top rated, price low→high, price high→low, name A–Z.
-- **Favorites:** add/remove from the list or the details page; both stay in sync.
-- **Details page** with payment, rating/experience/distance, working hours and
-  date pickers, and an async "Book an Appointment" action.
-- **Pull to refresh** reloads the JSON without losing filters or favorites.
-
-## Structure
+## Architecture
 
 ```
 lib/
-  main.dart, app.dart            entry point, providers, MaterialApp
-  core/theme/                    colors and theme
+  main.dart, app.dart, injection.dart   start-up and dependency wiring
+  core/
+    network/   ApiClient (http GET + status check + JSON decode), ApiConfig (base URL, timeout)
+    error/     exceptions.dart (Data layer), failures.dart (seen by Domain/UI)
+    theme/
+  domain/                      pure Dart, knows nothing about HTTP or Flutter UI
+    entities/                  Doctor, HomeFeed, AppointmentDetails, ...
+    repositories/              HealthRepository (abstract contract)
+    usecases/                  GetHomeFeed, GetAppointmentDetails, FilterDoctors
   data/
-    models/                      Doctor, HealthService, UserProfile,
-                                 UpcomingAppointment, AppointmentDetails, HealthData
-    repositories/                HealthRepository (interface) + AssetHealthRepository
-  logic/
-    home/                        HomeCubit + HomeState (load, search, filter, sort, favorites)
-    booking/                     BookingCubit (slot selection, booking)
+    models/                    DTOs with @JsonSerializable + generated *.g.dart, toEntity()
+    datasources/               HealthRemoteDataSource (calls the API, returns DTOs)
+    repositories/              HealthRepositoryImpl (DTO → entity, exception → Failure)
   presentation/
-    screens/                     HomeScreen, DoctorDetailsScreen
-    widgets/                     reusable UI: DoctorCard, ServiceTile, SearchField,
-                                 AppointmentCard, SectionHeader, SlotSelector,
-                                 FavoriteButton, PrimaryButton, NetworkAvatar,
-                                 SortFilterSheet, Loading/Empty/Error views
-test/                            model, cubit (bloc_test) and widget tests
+    cubits/                    HomeCubit, DetailsCubit (call use cases, emit states)
+    screens/                   HomeScreen, DoctorDetailsScreen
+    widgets/                   reusable UI components
 ```
 
-## Data
+Dependencies point inward: **Presentation → Domain ← Data**. The Domain layer
+defines the repository interface; the Data layer implements it.
 
-The JSON keeps the structure from the assignment. The doctor list was extended
-from 2 to 10 entries, and each doctor got `serviceId`, `rating`, `reviews`,
-`experienceYears` and `price`, so search, filtering and sorting have data to
-work on. Images load from the URLs in the JSON; the service icons fall back to
-the bundled PNGs and photos fall back to initials when offline.
+## Data flow
+
+```
+Tap / app start
+  → HomeCubit.load()                       emits Loading
+  → GetHomeFeed()                          use case
+  → HealthRepository.getHomeFeed()         interface (Domain)
+  → HealthRepositoryImpl                   (Data)
+  → HealthRemoteDataSource.getHomeFeed()
+  → ApiClient.getJson('/feed')             http.get, status check, jsonDecode
+  ← Map<String, dynamic>
+  ← HomeFeedModel.fromJson(json)           deserialization (generated)
+  ← .toEntity()                            DTO → Domain entity
+  ← HomeFeed                               or a Failure (Network / Server / Parsing)
+  → HomeCubit emits Success / Empty / Error
+  → BlocBuilder rebuilds the screen
+```
+
+## Features
+
+- Loading, Success, Empty and Error states on both screens, with "Try again".
+- Search, filter by health service or favorites, sort (nearest, name A–Z / Z–A).
+- Favorites shared between the list and the details page.
+- Pull to refresh calls the API again.
+- Clear error messages for no connection, timeout, server errors and bad data.
+
+## Notes
+
+- **The API is read-only.** It has no POST endpoints, so favorites are kept in
+  the app and "Book an Appointment" is simulated.
+- **`/feed/details` returns the same appointment for every doctor.** From the
+  list, the details page shows the tapped doctor with the API's appointment
+  data. From the appointment card, it shows the API's own doctor (Dr.Upul).
+- **Web browsers:** the API sends no CORS headers, so Chrome blocks the
+  requests and the app shows an Error explaining it. Run it on an Android
+  emulator / phone, or in Chrome for local testing only:
+  `flutter run -d chrome --web-browser-flag "--disable-web-security"`.
+- The free Render server can take ~30 s to wake up; the timeout is 45 s.
 
 ## Run
 
 ```bash
 flutter pub get
+dart run build_runner build --delete-conflicting-outputs   # only after changing models
 flutter run
 flutter test
 ```
+
+Tests cover JSON serialization (round-trip against real API responses), the
+HTTP client's error handling, the repository's failure mapping, the filter use
+case, both Cubits, and full app flows against a fake HTTP server.

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
-import '../../data/models/doctor.dart';
+import '../../domain/entities/doctor.dart';
 import 'favorite_button.dart';
 import 'network_avatar.dart';
 
@@ -64,10 +64,6 @@ class DoctorCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (doctor.rating > 0) ...[
-                        const SizedBox(width: 8),
-                        RatingLabel(rating: doctor.rating),
-                      ],
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -102,33 +98,6 @@ class DoctorCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-/// Star + "4.8".
-class RatingLabel extends StatelessWidget {
-  final double rating;
-  final double fontSize;
-
-  const RatingLabel({super.key, required this.rating, this.fontSize = 11});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(Icons.star_rounded, size: fontSize + 3, color: AppColors.star),
-        const SizedBox(width: 2),
-        Text(
-          rating.toStringAsFixed(1),
-          style: TextStyle(
-            fontSize: fontSize,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textDark,
-          ),
-        ),
-      ],
     );
   }
 }

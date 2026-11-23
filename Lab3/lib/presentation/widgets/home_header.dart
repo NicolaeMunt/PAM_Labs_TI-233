@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
-import '../../data/models/home_models.dart';
+import '../../domain/entities/home_feed.dart';
 import 'network_avatar.dart';
 
 /// "Hi, Jonathan" row with the user's photo and the notifications bell.
