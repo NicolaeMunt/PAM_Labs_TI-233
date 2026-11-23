@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/theme/app_colors.dart';
-import '../../logic/home/home_cubit.dart';
+import '../../domain/usecases/filter_doctors.dart';
+import '../cubits/home/home_cubit.dart';
 
 /// Bottom sheet with sorting, the favorites switch and the service filter.
 /// Every change goes straight to [HomeCubit], so the list updates live.
@@ -27,7 +28,7 @@ class SortFilterSheet extends StatelessWidget {
 
     return BlocBuilder<HomeCubit, HomeState>(
       builder: (context, state) {
-        final services = state.data?.services ?? const [];
+        final services = state.feed?.services ?? const [];
 
         return SafeArea(
           child: SingleChildScrollView(
